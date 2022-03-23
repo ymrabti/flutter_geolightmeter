@@ -220,7 +220,6 @@ class _LuxBannerState extends State<LuxBanner> {
                 /* child: SensorsPlusPage(), */
               ),
             ),
-            // const MarkerAnchorPage(),
           ],
         ),
       ),
