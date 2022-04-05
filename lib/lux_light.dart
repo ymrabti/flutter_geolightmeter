@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:csv/csv.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:geo_ligtmeter/location.dart';
@@ -198,6 +200,31 @@ class _LuxBannerState extends State<LuxBanner> {
 
   @override
   Widget build(BuildContext context) {
+    var conv = const ListToCsvConverter(
+      fieldDelimiter: '|*|',
+      textDelimiter: '<<',
+      textEndDelimiter: '>>',
+      eol: '**\n',
+    );
+    final res = conv.convert([
+      ['a', '>'],
+      ['<<', '>>'],
+      [1, 2]
+    ]);
+    assert(res == 'a|*|<<>>>**\n<<<<>>|*|<<>>>>>>**\n1|*|2');
+
+    final res2 = const ListToCsvConverter().convert(
+      [
+        ['a', '>'],
+        ['<<', '>>'],
+        [1, 2]
+      ],
+      fieldDelimiter: '|*|',
+      textDelimiter: '<<',
+      textEndDelimiter: '>>',
+      eol: '**\n',
+    );
+    assert(res == res2);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Geo Light Mater'),
@@ -225,4 +252,18 @@ class _LuxBannerState extends State<LuxBanner> {
       ),
     );
   }
+
+  saveCSV() async {
+    //   getAp
+    /* final String directory = (await getApplicationSupportDirectory()).path;
+    final path = "$directory/csv-${DateTime.now()}.csv"; */
+  }
+  /* Future<Directory> getApplicationSupportDirectory() async {
+    final String? path = await Platform.pathSeparator;
+    if (path == null) {
+      throw MissingPlatformDirectoryException('Unable to get application support directory');
+    }
+
+    return Directory(path);
+  } */
 }
