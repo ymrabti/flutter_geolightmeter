@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geo_ligtmeter/location.dart';
-import 'package:geo_ligtmeter/models.dart';
-import 'package:geo_ligtmeter/provider.dart';
+import 'package:geo_ligtmeter/screens/location.dart';
+import 'package:geo_ligtmeter/models/models.dart';
+import 'package:geo_ligtmeter/models/provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -26,7 +26,9 @@ class _MapsFlutterState extends State<MapsFlutter> {
 
   @override
   Widget build(BuildContext context) {
-    LocalizationData locationData = Provider.of<LocationProvider>(context).localizationData;
+    LocalizationData locationData = Provider.of<LocationProvider>(
+      context,
+    ).localizationData;
     return StreamBuilder<LocalizationData>(
       stream: _location(locationData),
       builder: (context, snapshot) {

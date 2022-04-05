@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
-import 'package:csv/csv.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:geo_ligtmeter/location.dart';
-import 'package:geo_ligtmeter/maps.dart';
+import 'package:geo_ligtmeter/screens/location.dart';
 import 'package:light/light.dart';
 
 class LuxBanner extends StatefulWidget {
@@ -20,6 +17,53 @@ class _LuxBannerState extends State<LuxBanner> {
   int _luxString = 0;
   late Light _light;
   late StreamSubscription _subscription;
+
+  final Color graphColor = Colors.blueAccent;
+
+  final limitCount = 50;
+  final luxPoints = <FlSpot>[];
+  get subList {
+    int length = luxPoints.length;
+    return luxPoints.sublist(
+      length < 50 ? 0 : length - 50,
+    );
+  }
+
+  double xValue = 0;
+  double step = 0.1;
+
+  late Timer timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
+      /* while (luxPoints.length > limitCount) {
+        luxPoints.removeAt(0);
+      } */
+      setState(() {
+        xValue += step;
+        luxPoints.add(
+          FlSpot(
+            xValue,
+            _luxString.toDouble(),
+          ),
+        );
+      });
+    });
+    startListening();
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return luxPoints.isNotEmpty ? colon() : Container();
+  }
 
   void onData(int luxValue) async {
     setState(() {
@@ -39,17 +83,6 @@ class _LuxBannerState extends State<LuxBanner> {
       consoleLog(text: exception.cause);
     }
   }
-
-  final Color sinColor = Colors.redAccent;
-  final Color cosColor = Colors.blueAccent;
-
-  final limitCount = 50;
-  final luxPoints = <FlSpot>[];
-
-  double xValue = 0;
-  double step = 0.1;
-
-  late Timer timer;
 
   Column colon() {
     var screenSize = MediaQuery.of(context).size;
@@ -78,7 +111,7 @@ class _LuxBannerState extends State<LuxBanner> {
         Text(
           'Lux: ${luxPoints.last.y.toStringAsFixed(1)}',
           style: TextStyle(
-            color: cosColor,
+            color: graphColor,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -160,110 +193,10 @@ class _LuxBannerState extends State<LuxBanner> {
       dotData: FlDotData(
         show: false,
       ),
-      colors: [/* cosColor.withOpacity(0), */ cosColor],
+      colors: [/* cosColor.withOpacity(0), */ graphColor],
       //   colorStops: [0.1, 1.0],
       barWidth: 4,
       isCurved: false,
     );
   }
-
-  @override
-  void initState() {
-    super.initState();
-    timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
-      while (luxPoints.length > limitCount) {
-        luxPoints.removeAt(0);
-      }
-      setState(() {
-        xValue += step;
-        luxPoints.add(
-          FlSpot(
-            xValue,
-            _luxString.toDouble(),
-          ),
-        );
-      });
-    });
-    initPlatformState();
-  }
-
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    startListening();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var conv = const ListToCsvConverter(
-      fieldDelimiter: '|*|',
-      textDelimiter: '<<',
-      textEndDelimiter: '>>',
-      eol: '**\n',
-    );
-    final res = conv.convert([
-      ['a', '>'],
-      ['<<', '>>'],
-      [1, 2]
-    ]);
-    assert(res == 'a|*|<<>>>**\n<<<<>>|*|<<>>>>>>**\n1|*|2');
-
-    final res2 = const ListToCsvConverter().convert(
-      [
-        ['a', '>'],
-        ['<<', '>>'],
-        [1, 2]
-      ],
-      fieldDelimiter: '|*|',
-      textDelimiter: '<<',
-      textEndDelimiter: '>>',
-      eol: '**\n',
-    );
-    assert(res == res2);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Geo Light Mater'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            luxPoints.isNotEmpty ? colon() : Container(),
-            const LocationScreen(),
-            const PhysicalModel(
-              elevation: 16,
-              color: Colors.white70,
-              child: MapsFlutter(),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: PhysicalModel(
-                elevation: 16,
-                color: Color.fromARGB(255, 231, 231, 231),
-                /* child: SensorsPlusPage(), */
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  saveCSV() async {
-    //   getAp
-    /* final String directory = (await getApplicationSupportDirectory()).path;
-    final path = "$directory/csv-${DateTime.now()}.csv"; */
-  }
-  /* Future<Directory> getApplicationSupportDirectory() async {
-    final String? path = await Platform.pathSeparator;
-    if (path == null) {
-      throw MissingPlatformDirectoryException('Unable to get application support directory');
-    }
-
-    return Directory(path);
-  } */
 }

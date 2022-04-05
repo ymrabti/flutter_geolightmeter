@@ -2,7 +2,7 @@ import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:geo_ligtmeter/csv/all_csv.dart';
 import 'package:geo_ligtmeter/csv/load_csv_data_screen.dart';
-import 'package:geo_ligtmeter/location.dart';
+import 'package:geo_ligtmeter/screens/location.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';

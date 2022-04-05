@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geo_ligtmeter/csv/load_csv_data_screen.dart';
-import 'package:geo_ligtmeter/location.dart';
+import 'package:geo_ligtmeter/screens/location.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'load_csv_data_screen.dart';

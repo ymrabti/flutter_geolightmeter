@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:geo_ligtmeter/models.dart';
-import 'package:geo_ligtmeter/provider.dart';
+import 'package:geo_ligtmeter/models/models.dart';
+import 'package:geo_ligtmeter/models/provider.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +18,10 @@ class _LocationScreenState extends State<LocationScreen> {
   Widget build(BuildContext context) {
     location.onLocationChanged.listen(
       (LocationData currentLocation) {
-        Provider.of<LocationProvider>(context, listen: false).changedLocation(
+        Provider.of<LocationProvider>(
+          context,
+          listen: false,
+        ).changedLocation(
           chngeLoc: LocalizationData(
               latitude: currentLocation.latitude ?? 0,
               longitude: currentLocation.longitude ?? 0,
