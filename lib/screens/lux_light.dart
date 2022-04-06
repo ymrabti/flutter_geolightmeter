@@ -3,8 +3,10 @@ import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:geo_ligtmeter/models/providers.dart';
 import 'package:geo_ligtmeter/screens/location.dart';
 import 'package:light/light.dart';
+import 'package:provider/provider.dart';
 
 class LuxBanner extends StatefulWidget {
   const LuxBanner({Key? key}) : super(key: key);
@@ -38,18 +40,20 @@ class _LuxBannerState extends State<LuxBanner> {
   void initState() {
     super.initState();
     timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
-      /* while (luxPoints.length > limitCount) {
+      while (luxPoints.length > limitCount) {
         luxPoints.removeAt(0);
-      } */
+      }
+      var flSpot = FlSpot(
+        xValue,
+        _luxString.toDouble(),
+      );
       setState(() {
         xValue += step;
         luxPoints.add(
-          FlSpot(
-            xValue,
-            _luxString.toDouble(),
-          ),
+          flSpot,
         );
       });
+      Provider.of<LuxProvider>(context, listen: false).changedAddLux(flSpot: flSpot);
     });
     startListening();
   }
@@ -169,6 +173,7 @@ class _LuxBannerState extends State<LuxBanner> {
                 ),
               ),
             ),
+            swapAnimationCurve: Curves.bounceIn,
           ),
         )
       ],
@@ -196,7 +201,7 @@ class _LuxBannerState extends State<LuxBanner> {
       colors: [/* cosColor.withOpacity(0), */ graphColor],
       //   colorStops: [0.1, 1.0],
       barWidth: 4,
-      isCurved: false,
+      isCurved: true,
     );
   }
 }

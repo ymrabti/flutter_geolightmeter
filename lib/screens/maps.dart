@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geo_ligtmeter/screens/location.dart';
 import 'package:geo_ligtmeter/models/models.dart';
-import 'package:geo_ligtmeter/models/provider.dart';
+import 'package:geo_ligtmeter/models/providers.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geo_ligtmeter/models/models.dart';
-import 'package:geo_ligtmeter/models/provider.dart';
+import 'package:geo_ligtmeter/models/providers.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
