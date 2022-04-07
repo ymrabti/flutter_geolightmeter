@@ -1,10 +1,12 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:geo_ligtmeter/models/models.dart';
-import 'package:geo_ligtmeter/screens/location.dart';
 
 class LocationProvider extends ChangeNotifier {
   LocalizationData localizationData;
+  LocalizationData getLocalizationData() {
+    return localizationData;
+  }
+
   LocationProvider({required this.localizationData});
   void changedLocation({required LocalizationData chngeLoc}) {
     localizationData = chngeLoc;
@@ -13,11 +15,16 @@ class LocationProvider extends ChangeNotifier {
 }
 
 class LuxProvider extends ChangeNotifier {
-  List<FlSpot> fflSpot;
-  LuxProvider({required this.fflSpot});
-  void changedAddLux({required FlSpot flSpot}) {
-    consoleLog(text: flSpot);
-    fflSpot.add(flSpot);
+  List<MyLuxCSV> fflSpot;
+  bool isRecording;
+  LuxProvider({required this.fflSpot, this.isRecording = false});
+  void changedAddLux({required MyLuxCSV geoLux}) {
+    if (isRecording) fflSpot.add(geoLux);
+    notifyListeners();
+  }
+
+  void changedRecord() {
+    isRecording = !isRecording;
     notifyListeners();
   }
 }

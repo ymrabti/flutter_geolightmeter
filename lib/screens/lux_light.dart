@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:geo_ligtmeter/models/models.dart';
 import 'package:geo_ligtmeter/models/providers.dart';
 import 'package:geo_ligtmeter/screens/location.dart';
 import 'package:light/light.dart';
@@ -43,9 +44,10 @@ class _LuxBannerState extends State<LuxBanner> {
       while (luxPoints.length > limitCount) {
         luxPoints.removeAt(0);
       }
+      double luxStr = _luxString.toDouble();
       var flSpot = FlSpot(
         xValue,
-        _luxString.toDouble(),
+        luxStr,
       );
       setState(() {
         xValue += step;
@@ -53,7 +55,24 @@ class _LuxBannerState extends State<LuxBanner> {
           flSpot,
         );
       });
-      Provider.of<LuxProvider>(context, listen: false).changedAddLux(flSpot: flSpot);
+      var luxProv = Provider.of<LuxProvider>(context, listen: false);
+      final localization2 =
+          Provider.of<LocationProvider>(context, listen: false).getLocalizationData();
+      var localization1 = LocalizationData(
+        accuracy: 0,
+        altitude: 0,
+        heading: 0,
+        latitude: 0,
+        longitude: 0,
+        speed: 0,
+      );
+      var localization = localization2;
+      MyLuxCSV myLuxCSV = MyLuxCSV(
+        lux: luxStr,
+        dateTime: DateTime.now(),
+        localizationData: localization,
+      );
+      luxProv.changedAddLux(geoLux: myLuxCSV);
     });
     startListening();
   }

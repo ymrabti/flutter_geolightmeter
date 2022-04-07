@@ -1,3 +1,5 @@
+import 'package:fl_chart/fl_chart.dart';
+
 class LocalizationData {
   double latitude;
   double longitude;
@@ -18,4 +20,15 @@ class LocalizationData {
     return """$latitude <=> $longitude <=> $accuracy <=> $speed <=> $altitude <=> $heading
 """;
   }
+}
+
+class MyLuxCSV {
+  double lux;
+  LocalizationData localizationData;
+  DateTime dateTime;
+  MyLuxCSV({
+    required this.lux,
+    required this.dateTime,
+    required this.localizationData,
+  });
 }

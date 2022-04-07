@@ -129,7 +129,7 @@ class _LoadCsvDataScreenState extends State<LoadCsvDataScreen> {
   }
 
   Future<List<List<dynamic>>> loadingCsvData(String path) async {
-    await Future.delayed(const Duration(seconds: 2));
+    // await Future.delayed(const Duration(seconds: 2));
     final csvFile = File(path).openRead();
     return await csvFile
         .transform(utf8.decoder)
