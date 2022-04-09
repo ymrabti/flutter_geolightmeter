@@ -18,18 +18,22 @@ class _LocationScreenState extends State<LocationScreen> {
   Widget build(BuildContext context) {
     location.onLocationChanged.listen(
       (LocationData currentLocation) {
-        Provider.of<LocationProvider>(
+        var of = Provider.of<LocationProvider>(
           context,
           listen: false,
-        ).changedLocation(
-          chngeLoc: LocalizationData(
-              latitude: currentLocation.latitude ?? 0,
-              longitude: currentLocation.longitude ?? 0,
-              altitude: currentLocation.altitude ?? 0,
-              accuracy: currentLocation.accuracy ?? 0,
-              heading: currentLocation.heading ?? 0,
-              speed: currentLocation.speed ?? 0),
         );
+        var localizationData = LocalizationData(
+          latitude: currentLocation.latitude ?? 0,
+          longitude: currentLocation.longitude ?? 0,
+          altitude: currentLocation.altitude ?? 0,
+          accuracy: currentLocation.accuracy ?? 0,
+          heading: currentLocation.heading ?? 0,
+          speed: currentLocation.speed ?? 0,
+        );
+        of.changedLocation(
+          chngeLoc: localizationData,
+        );
+        of.adddLocation(chngeLoc: localizationData);
       },
     );
     // location.enableBackgroundMode(enable: true);
@@ -42,27 +46,27 @@ class _LocationScreenState extends State<LocationScreen> {
       ),
     );
   }
+}
 
-  localisation() async {
-    Location location = Location();
+localisation() async {
+  Location location = Location();
 
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
+  bool _serviceEnabled;
+  PermissionStatus _permissionGranted;
 
-    _serviceEnabled = await location.serviceEnabled();
+  _serviceEnabled = await location.serviceEnabled();
+  if (!_serviceEnabled) {
+    _serviceEnabled = await location.requestService();
     if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
+      return;
     }
+  }
 
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
+  _permissionGranted = await location.hasPermission();
+  if (_permissionGranted == PermissionStatus.denied) {
+    _permissionGranted = await location.requestPermission();
+    if (_permissionGranted != PermissionStatus.granted) {
+      return;
     }
   }
 }

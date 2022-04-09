@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geo_ligtmeter/csv/load_csv_data_screen.dart';
+import 'package:geo_ligtmeter/screens/app.dart';
 import 'package:geo_ligtmeter/screens/location.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'load_csv_data_screen.dart';
 
 class AllCsvFilesScreen extends StatelessWidget {
@@ -12,36 +12,45 @@ class AllCsvFilesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("All CSV Files"),
+        title: const Text("Mes Enregistrements"),
       ),
       body: FutureBuilder(
-        future: _getAllCsvFiles(),
+        future: _getAllCsvFiles(context),
         builder: (context, AsyncSnapshot<List<FileSystemEntity>> snapshot) {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Text("empty");
+            return const Center(
+              child: Text(
+                "Aucune enregistrement",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
           }
-          consoleLog(text: '${snapshot.data!.length} ${snapshot.data}', color: 31);
           if (snapshot.data!.isEmpty) {
             return const Center(
               child: Text('No Csv File found.'),
             );
           }
           return ListView.builder(
-            itemBuilder: (context, index) => Card(
-              child: ListTile(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => LoadCsvDataScreen(path: snapshot.data![index].path),
-                    ),
-                  );
-                },
-                title: Text(
-                  snapshot.data![index].path.substring(44),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+            itemBuilder: (context, index) {
+              var substring = snapshot.data![index].path.split("/").last;
+              return Card(
+                child: ListTile(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => LoadCsvDataScreen(path: snapshot.data![index].path),
+                      ),
+                    );
+                  },
+                  title: Text(
+                    substring,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
             itemCount: snapshot.data!.length,
           );
         },
@@ -49,9 +58,9 @@ class AllCsvFilesScreen extends StatelessWidget {
     );
   }
 
-  Future<List<FileSystemEntity>> _getAllCsvFiles() async {
-    final String directory = (await getApplicationDocumentsDirectory()).path;
-    final path = "$directory/";
+  Future<List<FileSystemEntity>> _getAllCsvFiles(BuildContext context) async {
+    final Directory directory = await getDir();
+    final path = "${directory.path}/";
     final myDir = Directory(path);
     List<FileSystemEntity> _csvFiles;
     _csvFiles = myDir.listSync(recursive: true, followLinks: false);

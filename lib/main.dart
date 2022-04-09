@@ -28,6 +28,7 @@ class _MyAppState extends State<MyApp> {
               heading: 0.0,
               speed: 0.0,
             ),
+            localizationsData: [],
           ),
         ),
         ChangeNotifierProvider(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -19,35 +20,56 @@ class MapsFlutter extends StatefulWidget {
 
 class _MapsFlutterState extends State<MapsFlutter> {
   LatLng currentPosition = LatLng(0, 0);
-  late List<LatLng> points;
+//   late List<LatLng> points;
 
-  late List<LatLng> pointsGradient;
   late List<Polyline> polyLines;
+  late List<Polygon> polygons;
   late MapController _mapControlleur;
 
   @override
   void initState() {
+    super.initState();
     _mapControlleur = MapController();
 
-    points = <LatLng>[];
-
-    pointsGradient = <LatLng>[];
+    Timer.periodic(const Duration(milliseconds: 1000), (timer) {
+      /* setState(() {
+        points.add(
+          LatLng(
+            34.928605854017 + random,
+            -2.3147196356671724 + random,
+          ),
+        );
+      }); */
+    });
+    polygons = [
+      Polygon(
+        points: List.generate(
+          1,
+          (index) => LatLng(
+            34.928605854017 + random,
+            -2.3147196356671724 + random,
+          ),
+        ),
+        borderStrokeWidth: 2.0,
+        color: const Color(0xFF7A69AE).withAlpha(64),
+      ),
+    ];
     polyLines = [
       Polyline(
         points: [],
         strokeWidth: 4.0,
-        color: Colors.amber,
+        color: Colors.red,
       ),
     ];
-    super.initState();
   }
+
+  double get random => (Random().nextDouble() * 2.0 - 1) * 0.05;
 
   @override
   Widget build(BuildContext context) {
     LocalizationData locationData = Provider.of<LocationProvider>(
       context,
     ).localizationData;
-    // consoleLog(text: pointsGradient.length);
 
     return StreamBuilder<LocalizationData>(
       stream: _location(locationData),
@@ -67,7 +89,7 @@ class _MapsFlutterState extends State<MapsFlutter> {
               mapController: _mapControlleur,
               options: MapOptions(
                 onPositionChanged: (position, hasGesture) {
-                  //   consoleLog(text: position.center);
+                  //
                 },
                 onTap: (tapPosition, point) {
                   consoleLog(text: _mapControlleur.center, color: 33);
@@ -83,28 +105,6 @@ class _MapsFlutterState extends State<MapsFlutter> {
                   urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                   subdomains: ['a', 'b', 'c'],
                 ),
-                PolylineLayerOptions(
-                  polylines: [
-                    Polyline(points: points, strokeWidth: 4.0, color: Colors.purple),
-                  ],
-                ),
-                PolylineLayerOptions(
-                  polylines: [
-                    Polyline(
-                      points: pointsGradient,
-                      strokeWidth: 4.0,
-                      gradientColors: [
-                        const Color(0xffE40203),
-                        const Color(0xffFEED00),
-                        const Color(0xff007E2D),
-                      ],
-                    ),
-                  ],
-                ),
-                /*PolylineLayerOptions(
-                  polylines: polyLines,
-                  polylineCulling: true,
-                ),*/
                 MarkerLayerOptions(
                   markers: [
                     Marker(
@@ -133,6 +133,36 @@ class _MapsFlutterState extends State<MapsFlutter> {
                     ),
                   ],
                 ),
+                PolylineLayerOptions(
+                  polylines: [
+                    Polyline(
+                      points: Provider.of<LocationProvider>(
+                        context,
+                      )
+                          .localizationsData
+                          .map(
+                            (e) => LatLng(e.latitude, e.longitude),
+                          )
+                          .toList(),
+                      strokeWidth: 4.0,
+                      gradientColors: [
+                        const Color(0xffE40203),
+                        const Color(0xffE40203),
+                        const Color(0xffE40203),
+                      ],
+                    ),
+                  ],
+                ),
+                PolygonLayerOptions(
+                  polygons: polygons,
+                ),
+                /* PolylineLayerOptions(
+                  polylines: polyLines,
+                ),
+                PolylineLayerOptions(
+                  polylines: polyLines,
+                  //polylineCulling: true,
+                ), */
               ],
             ),
           );
@@ -181,8 +211,6 @@ class _MapsFlutterState extends State<MapsFlutter> {
 }
 
 class PolylinePage extends StatefulWidget {
-  static const String route = 'polyline';
-
   const PolylinePage({Key? key}) : super(key: key);
 
   @override
@@ -192,45 +220,85 @@ class PolylinePage extends StatefulWidget {
 class _PolylinePageState extends State<PolylinePage> {
   late List<Polyline> polylines;
 
-  List<Polyline> getPolylines() {
-    var polyLines = [
-      Polyline(
-        points: [
-          LatLng(50.5, -0.09),
-          LatLng(51.3498, -6.2603),
-          LatLng(53.8566, 2.3522),
-        ],
-        strokeWidth: 4.0,
-        color: Colors.amber,
-      ),
-    ];
-    return polyLines;
-  }
-
+  late Timer timer;
+  double get random => (Random().nextDouble() * 2.0 - 1) * 0.05;
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
+    timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
+      setState(() {
+        points.add(
+          LatLng(
+            34.928605854017 + random,
+            -2.3147196356671724 + random,
+          ),
+        );
+      });
+    });
+    polylines = [
+      Polyline(
+        points: points,
+        strokeWidth: 4.0,
+        color: Colors.red,
+      ),
+    ];
   }
+
+  List<LatLng> points = [];
 
   @override
   Widget build(BuildContext context) {
+    /* var points = <LatLng>[
+      LatLng(51.5, -0.09),
+      LatLng(53.3498, -6.2603),
+      LatLng(48.8566, 2.3522),
+    ];
+
+    var pointsGradient = <LatLng>[
+      LatLng(55.5, -0.09),
+      LatLng(54.3498, -6.2603),
+      LatLng(52.8566, 2.3522),
+    ]; */
+
     return SizedBox(
       height: 400,
       child: FlutterMap(
         options: MapOptions(
-          center: LatLng(51.5, -0.09),
-          zoom: 5.0,
-          onTap: (tapPosition, point) {
-            setState(() {
-              debugPrint('onTap');
-              polylines = getPolylines();
-            });
-          },
+          center: LatLng(34.928605854017, -2.3147196356671724),
+          zoom: 15.0,
         ),
         layers: [
           TileLayerOptions(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: ['a', 'b', 'c']),
+            urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            subdomains: ['a', 'b', 'c'],
+          ),
+          PolylineLayerOptions(
+            polylines: polylines,
+            polylineCulling: true,
+          ),
+          /* PolylineLayerOptions(
+            polylines: [
+              Polyline(
+                points: points,
+                strokeWidth: 4.0,
+                color: Colors.purple,
+              ),
+            ],
+          ),
+          PolylineLayerOptions(
+            polylines: [
+              Polyline(
+                points: pointsGradient,
+                strokeWidth: 4.0,
+                gradientColors: [
+                  const Color(0xffE40203),
+                  const Color(0xffFEED00),
+                  const Color(0xff007E2D),
+                ],
+              ),
+            ],
+          ), */
         ],
       ),
     );
