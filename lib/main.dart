@@ -41,3 +41,5 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+// git add . && git commit -m "message" && git push -u origin main

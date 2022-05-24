@@ -1,5 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
-
 class LocalizationData {
   double latitude;
   double longitude;

@@ -2,9 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:geo_ligtmeter/screens/flutter_compass/flutter_compass.dart';
-// import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geo_ligtmeter/screens/location.dart';
-// import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CompassApp extends StatefulWidget {
   const CompassApp({
@@ -16,38 +15,36 @@ class CompassApp extends StatefulWidget {
 }
 
 class _CompassAppState extends State<CompassApp> {
-  final bool _hasPermissions = false;
+  bool _hasPermissions = false;
   CompassEvent? _lastRead;
   DateTime? _lastReadAt;
 
   @override
   void initState() {
     super.initState();
-    localisation();
-    // _fetchPermissionStatus();
+
+    _fetchPermissionStatus();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: const Text('Flutter Compass'),
-        ),
-        body: Builder(builder: (context) {
-          if (!_hasPermissions) {
-            return Column(
-              children: <Widget>[
-                _buildManualReader(),
-                Expanded(child: _buildCompass()),
-              ],
-            );
-          } else {
-            return _buildPermissionSheet();
-          }
-        }),
-      ),
+    return Builder(
+      builder: (context) {
+        if (_hasPermissions) {
+          return Column(
+            children: <Widget>[
+              _buildManualReader(),
+              SizedBox(
+                child: _buildCompass(),
+                width: double.infinity,
+                height: 300,
+              ),
+            ],
+          );
+        } else {
+          return _buildPermissionSheet();
+        }
+      },
     );
   }
 
@@ -93,17 +90,18 @@ class _CompassAppState extends State<CompassApp> {
     return StreamBuilder<CompassEvent>(
       stream: FlutterCompass.events,
       builder: (context, snapshot) {
+        consoleLog(text: snapshot.data);
         if (snapshot.hasError) {
           return Text('Error reading heading: ${snapshot.error}');
         }
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        /* if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(),
           );
-        }
+        } */
 
-        double? direction = snapshot.data!.heading;
+        double? direction = snapshot.data != null ? snapshot.data!.heading : 0;
 
         // if direction is null, then device does not support this sensor
         // show error message
@@ -142,20 +140,18 @@ class _CompassAppState extends State<CompassApp> {
           ElevatedButton(
             child: const Text('Request Permissions'),
             onPressed: () {
-              /* Permission.locationWhenInUse.request().then((ignored) {
+              Permission.locationWhenInUse.request().then((ignored) {
                 _fetchPermissionStatus();
-              }); */
+              });
             },
           ),
           const SizedBox(height: 16),
           ElevatedButton(
             child: const Text('Open App Settings'),
             onPressed: () {
-              /* openAppSettings().then(
-                (opened) {
-                  //
-                },
-              ); */
+              openAppSettings().then((opened) {
+                //
+              });
             },
           )
         ],
@@ -163,11 +159,11 @@ class _CompassAppState extends State<CompassApp> {
     );
   }
 
-  /* void _fetchPermissionStatus() {
+  void _fetchPermissionStatus() {
     Permission.locationWhenInUse.status.then((status) {
       if (mounted) {
         setState(() => _hasPermissions = status == PermissionStatus.granted);
       }
     });
-  } */
+  }
 }

@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:geo_ligtmeter/csv/all_csv.dart';
 import 'package:geo_ligtmeter/csv/load_csv_data_screen.dart';
 import 'package:geo_ligtmeter/screens/app.dart';
-import 'package:geo_ligtmeter/screens/location.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:random_string/random_string.dart';
@@ -90,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     ];
     String csvData = const ListToCsvConverter().convert(data);
-    final Directory directory = await getDir();
+    final Directory directory = (await getExternalDir())[0];
     final path = "${directory.path}/csv-${DateTime.now()}.csv";
     final File file = File(path);
     await file.writeAsString(csvData);

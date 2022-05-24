@@ -58,14 +58,14 @@ class _LuxBannerState extends State<LuxBanner> {
       var luxProv = Provider.of<LuxProvider>(context, listen: false);
       final localization2 =
           Provider.of<LocationProvider>(context, listen: false).getLocalizationData();
-      var localization1 = LocalizationData(
+      /* var localization1 = LocalizationData(
         accuracy: 0,
         altitude: 0,
         heading: 0,
         latitude: 0,
         longitude: 0,
         speed: 0,
-      );
+      ); */
       var localization = localization2;
       MyLuxCSV myLuxCSV = MyLuxCSV(
         lux: luxStr,

@@ -26,6 +26,8 @@ class _MyAppState extends State<MyApp> {
 class HomePage extends StatelessWidget {
   final FileManagerController controller = FileManagerController();
 
+  HomePage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     // Creates a widget that registers a callback to veto attempts by the user to dismiss the enclosing
@@ -247,7 +249,9 @@ class HomePage extends StatelessWidget {
                       await FileManager.createFolder(controller.getCurrentPath, folderName.text);
                       // Open Created Folder
                       controller.setCurrentPath = controller.getCurrentPath + "/" + folderName.text;
-                    } catch (e) {}
+                    } catch (e) {
+                      //
+                    }
 
                     Navigator.pop(context);
                   },

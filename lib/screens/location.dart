@@ -109,7 +109,7 @@ class _LocationBannerState extends State<LocationBanner> {
         var textHead = TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: screenSize.width * 0.05,
-          color: Color(0xFFFFFFFF),
+          color: const Color(0xFFFFFFFF),
           wordSpacing: 1.5,
           height: 1.2,
           shadows: const [

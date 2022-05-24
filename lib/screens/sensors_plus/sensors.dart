@@ -1,4 +1,4 @@
-/* import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
@@ -24,68 +24,105 @@ class _SensorsPlusPageState extends State<SensorsPlusPage> {
 
   @override
   Widget build(BuildContext context) {
-    final accelerometer = _accelerometerValues?.map((double v) => v.toStringAsFixed(1)).toList();
-    final gyroscope = _gyroscopeValues?.map((double v) => v.toStringAsFixed(1)).toList();
+    final accelerometer = _accelerometerValues?.map((double v) => v.toStringAsFixed(3)).toList();
+    final gyroscope = _gyroscopeValues?.map((double v) => v.toStringAsFixed(3)).toList();
     final userAccelerometer =
-        _userAccelerometerValues?.map((double v) => v.toStringAsFixed(1)).toList();
-    final magnetometer = _magnetometerValues?.map((double v) => v.toStringAsFixed(1)).toList();
+        _userAccelerometerValues?.map((double v) => v.toStringAsFixed(3)).toList();
+    final magnetometer = _magnetometerValues?.map((double v) => v.toStringAsFixed(3)).toList();
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        Center(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border.all(width: 1.0, color: Colors.black38),
-            ),
-            child: SizedBox(
-              height: _snakeRows * _snakeCellSize,
-              width: _snakeColumns * _snakeCellSize,
-              child: Snake(
-                rows: _snakeRows,
-                columns: _snakeColumns,
-                cellSize: _snakeCellSize,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: PhysicalModel(
+        elevation: 16,
+        color: const Color.fromARGB(255, 231, 231, 231),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Center(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border.all(width: 1.0, color: Colors.black38),
+                ),
+                child: const SizedBox(
+                  height: _snakeRows * _snakeCellSize,
+                  width: _snakeColumns * _snakeCellSize,
+                  child: Snake(
+                    rows: _snakeRows,
+                    columns: _snakeColumns,
+                    cellSize: _snakeCellSize,
+                  ),
+                ),
               ),
             ),
-          ),
+            StreamBuilder(
+              stream: gyroscopeEvents.asBroadcastStream(),
+              builder: ((BuildContext buildContext, snapshot) {
+                // consoleLog(text: snapshot.data);
+                if (snapshot.hasData) {
+                  return Column(
+                    children: <Widget>[
+                      const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Center(
+                          child: RotationTransition(
+                            turns: AlwaysStoppedAnimation(50),
+                            // child: Image.asset("assets/compass.png"),
+                            child: Icon(Icons.compass_calibration),
+                          ),
+                        ),
+                      ),
+                      Text("SensorType: ${snapshot.data}"),
+                    ],
+                  );
+                } else if (snapshot.hasError) {
+                  return const Text("Error in stream");
+                } else {
+                  return const Text(
+                    "Error",
+                    style: TextStyle(color: Colors.red),
+                  );
+                }
+              }),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('Accelerometer: $accelerometer'),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('UserAccelerometer: $userAccelerometer'),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('Gyroscope: $gyroscope'),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('Magnetometer: $magnetometer'),
+                ],
+              ),
+            ),
+          ],
         ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('Accelerometer: $accelerometer'),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('UserAccelerometer: $userAccelerometer'),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('Gyroscope: $gyroscope'),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('Magnetometer: $magnetometer'),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -139,4 +176,3 @@ class _SensorsPlusPageState extends State<SensorsPlusPage> {
     );
   }
 }
- */

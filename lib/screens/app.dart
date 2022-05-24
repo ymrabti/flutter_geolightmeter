@@ -1,20 +1,19 @@
 import 'dart:io';
-import 'dart:ui';
 import 'package:csv/csv.dart';
-import 'package:filesystem_picker/filesystem_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geo_ligtmeter/csv/all_csv.dart';
 import 'package:geo_ligtmeter/csv/load_csv_data_screen.dart';
 import 'package:geo_ligtmeter/models/models.dart';
 import 'package:geo_ligtmeter/models/providers.dart';
-import 'package:geo_ligtmeter/screens/compass.dart';
 import 'package:geo_ligtmeter/screens/folder_picker/folder_picker.dart';
 import 'package:geo_ligtmeter/screens/location.dart';
 import 'package:geo_ligtmeter/screens/maps.dart';
 import 'package:geo_ligtmeter/screens/lux_light.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:wakelock/wakelock.dart';
 
 class ApplicationGeoLightmeter extends StatefulWidget {
   const ApplicationGeoLightmeter({Key? key}) : super(key: key);
@@ -26,6 +25,7 @@ class ApplicationGeoLightmeter extends StatefulWidget {
 class _ApplicationGeoLightmeterState extends State<ApplicationGeoLightmeter> {
   @override
   Widget build(BuildContext context) {
+    Wakelock.enable();
     var luxProvider = Provider.of<LuxProvider>(context);
     List<MyLuxCSV> flspots = luxProvider.fflSpot;
     bool isRecording = luxProvider.isRecording;
@@ -71,32 +71,21 @@ class _ApplicationGeoLightmeterState extends State<ApplicationGeoLightmeter> {
               ),
             ),
             if (flspots.isNotEmpty && !isRecording) saveCSV(flspots),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (BuildContext context) {
-                      return const CompassApp();
-                    },
-                  ),
-                );
-              },
-              child: Container(
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Center(
-                    child: Text(
-                      '${flspots.length}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+            Container(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Center(
+                  child: Text(
+                    '${flspots.length}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.red,
-                ),
+              ),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.red,
               ),
             ),
           ],
@@ -104,22 +93,11 @@ class _ApplicationGeoLightmeterState extends State<ApplicationGeoLightmeter> {
         body: SingleChildScrollView(
           child: Column(
             children: const [
+              /* CompassApp(),
+              SensorsPlusPage(), */
               LuxBanner(),
               LocationScreen(),
-              PhysicalModel(
-                elevation: 16,
-                color: Colors.white70,
-                child: MapsFlutter(),
-              ),
-              //   PolylinePage(),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: PhysicalModel(
-                  elevation: 16,
-                  color: Color.fromARGB(255, 231, 231, 231),
-                  /* child: SensorsPlusPage(), */
-                ),
-              ),
+              MapsFlutter(),
             ],
           ),
         ),
@@ -130,7 +108,75 @@ class _ApplicationGeoLightmeterState extends State<ApplicationGeoLightmeter> {
   GestureDetector saveCSV(List<MyLuxCSV> flspots) {
     return GestureDetector(
       onTap: () async {
-        await generateCsv(flspots);
+        final String directory = await getSaveDir(context);
+        await generateCsv(flspots, directory);
+      },
+      onLongPress: () async {
+        // final Directory directory = await getDocumentsDir();
+        final Directory? dir = await showCupertinoDialog<Directory>(
+          context: context,
+          builder: (context) {
+            return CupertinoAlertDialog(
+              title: const Text(
+                "Enregisrer sous",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: const Text("choisir un dossier"),
+              actions: [
+                CupertinoButton(
+                  child: const Text("Application Support"),
+                  onPressed: () async {
+                    final Directory directory = await getDocumentsDir();
+                    consoleLog(text: directory.path, color: 31);
+                    Navigator.pop(context, directory);
+                  },
+                ),
+                CupertinoButton(
+                  child: const Text("Dossier d'application"),
+                  onPressed: () async {
+                    final Directory directory = (await getExternalDir())[0];
+                    consoleLog(text: directory.path, color: 32);
+                    Navigator.pop(context, directory);
+                  },
+                ),
+                CupertinoButton(
+                  child: const Text("Dossier cache"),
+                  onPressed: () async {
+                    final Directory directory =
+                        (await path_provider.getExternalCacheDirectories())![0];
+                    consoleLog(text: directory.path, color: 33);
+                    Navigator.pop(context, directory);
+                  },
+                ),
+                /* CupertinoButton(
+                  child: const Text("Library"),
+                  onPressed: () async {
+                    final Directory directory = (await path_provider.getLibraryDirectory());
+                    consoleLog(text: directory.path, color: 33);
+                    Navigator.pop(context, directory);
+                  },
+                ),
+                CupertinoButton(
+                  child: const Text("Temperary"),
+                  onPressed: () async {
+                    final Directory directory = (await path_provider.getTemporaryDirectory());
+                    consoleLog(text: directory.path, color: 39);
+                    Navigator.pop(context, directory);
+                  },
+                ), */
+              ],
+            );
+          },
+        );
+        if (dir != null) {
+          await generateCsv(flspots, dir.path);
+        }
+      },
+      onDoubleTap: () async {
+        final Directory directory = (await path_provider.getExternalStorageDirectories())![0];
+        await generateCsv(flspots, directory.path);
       },
       child: Container(
         child: const Padding(
@@ -145,7 +191,7 @@ class _ApplicationGeoLightmeterState extends State<ApplicationGeoLightmeter> {
     );
   }
 
-  Future<void> generateCsv(List<MyLuxCSV> list) async {
+  Future<void> generateCsv(List<MyLuxCSV> list, String directory) async {
     List<List<dynamic>> data = [
       ["Time", "Lux", "Latitude.", "Longitude", "Altitude", "Accuracy", "Heading", "Speed"],
       ...List.generate(
@@ -166,15 +212,12 @@ class _ApplicationGeoLightmeterState extends State<ApplicationGeoLightmeter> {
       ),
     ];
     String csvData = const ListToCsvConverter().convert(data);
-    final String directory = await getSaveDir(context);
     final path = "$directory/csv-${DateTime.now()}.csv";
     final File file = File(path);
     var status = await Permission.manageExternalStorage.status;
-    consoleLog(text: {status, directory});
+    // consoleLog(text: {status, directory});
     await Permission.storage.request();
-    if (status.isRestricted) {
-      status = await Permission.manageExternalStorage.request();
-    } else if (status.isDenied) {
+    if (status.isRestricted || status.isDenied) {
       status = await Permission.manageExternalStorage.request();
     } else if (status.isPermanentlyDenied) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -197,12 +240,16 @@ class _ApplicationGeoLightmeterState extends State<ApplicationGeoLightmeter> {
   }
 }
 
-Future<Directory> getDir() async {
-  var externalStorageDirectories = await getExternalStorageDirectories();
-  return externalStorageDirectories![0];
+Future<List<Directory>> getExternalDir() async {
+  var externalStorageDirectories = await path_provider.getExternalStorageDirectories();
+  return externalStorageDirectories ?? [];
 }
 
-Future<String> getSaveDir(BuildContext context) async {
+Future<Directory> getDocumentsDir() async => await path_provider.getApplicationDocumentsDirectory();
+
+Future<String> getSaveDir(BuildContext buildContext) async => (await getExternalDir())[0].path;
+
+Future<String> selectDirectory(BuildContext context) async {
   Directory? directory = Directory(FolderPicker.rOOTPATH);
   Directory? newDirectory = await FolderPicker.pick(
     allowFolderCreation: true,
@@ -212,9 +259,20 @@ Future<String> getSaveDir(BuildContext context) async {
   return newDirectory!.path;
 }
 
-Future<String> _selectDirectory(BuildContext buildContext) async {
-  Directory? rootPath = await getDir();
-  String? path = await FilesystemPicker.open(
+const String emulatd = "/storage/emulated/0/Android/data/com.ymrabtiapps.geoligtmeter";
+
+String getFileName(String filename) {
+  var substring = filename.replaceAll(RegExp(r'[\:|\- \.csv]'), "").substring(0, 12).split("");
+  substring.insert(4, ".");
+  substring.insert(7, ".");
+  substring.insert(10, ".");
+  substring.insert(13, ".");
+  return substring.join("");
+}
+
+// Future<Directory> getSupportDir() async => await getApplicationSupportDirectory();
+
+/* String? path = await FilesystemPicker.open(
     title: 'Save to folder',
     context: buildContext,
     rootDirectory: rootPath,
@@ -227,5 +285,4 @@ Future<String> _selectDirectory(BuildContext buildContext) async {
       return bool;
     },
   );
-  return path ?? "";
-}
+  return path ?? ""; */

@@ -51,7 +51,7 @@ class FolderPicker {
     }
   }
 
-  static String rOOTPATH = "/storage/emulated/0/";
+  static String rOOTPATH = "/storage/emulated/0/Documents";
 }
 
 class DirectoryPickerData extends InheritedWidget {
@@ -182,7 +182,7 @@ class _DirectoryPickerDialogState extends State<_DirectoryPickerDialog>
         ),
       );
     } else if (status == PermissionStatus.granted) {
-      return DirectoryList();
+      return const DirectoryList();
     } else if (status == PermissionStatus.denied) {
       return const Center(
         child: Padding(

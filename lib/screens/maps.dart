@@ -71,51 +71,54 @@ class _MapsFlutterState extends State<MapsFlutter> {
       context,
     ).localizationData;
 
-    return StreamBuilder<LocalizationData>(
-      stream: _location(locationData),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          double lat = 34.927891, lng = -2.329926;
-          lat = snapshot.data!.latitude;
-          lng = snapshot.data!.longitude;
+    return PhysicalModel(
+      elevation: 16,
+      color: Colors.white70,
+      child: StreamBuilder<LocalizationData>(
+        stream: _location(locationData),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            double lat = 34.927891, lng = -2.329926;
+            lat = snapshot.data!.latitude;
+            lng = snapshot.data!.longitude;
 
-          return SizedBox(
-            height: 300,
-            child: FlutterMap(
-              children: const [
-                Icon(Icons.location_searching),
-              ],
-              key: const Key("MapFlutterKey"),
-              mapController: _mapControlleur,
-              options: MapOptions(
-                onPositionChanged: (position, hasGesture) {
-                  //
-                },
-                onTap: (tapPosition, point) {
-                  consoleLog(text: _mapControlleur.center, color: 33);
-                  consoleLog(text: tapPosition.toString(), color: 34);
-                  consoleLog(text: currentPosition);
-                  _mapControlleur.move(LatLng(lat, lng), 15);
-                },
-                center: currentPosition,
-                zoom: 14.0,
-              ),
-              layers: [
-                TileLayerOptions(
-                  urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                  subdomains: ['a', 'b', 'c'],
+            return SizedBox(
+              height: 300,
+              child: FlutterMap(
+                children: const [
+                  Icon(Icons.location_searching),
+                ],
+                key: const Key("MapFlutterKey"),
+                mapController: _mapControlleur,
+                options: MapOptions(
+                  onPositionChanged: (position, hasGesture) {
+                    //
+                  },
+                  onTap: (tapPosition, point) {
+                    consoleLog(text: _mapControlleur.center, color: 33);
+                    consoleLog(text: tapPosition.toString(), color: 34);
+                    consoleLog(text: currentPosition);
+                    _mapControlleur.move(LatLng(lat, lng), 15);
+                  },
+                  center: currentPosition,
+                  zoom: 14.0,
                 ),
-                MarkerLayerOptions(
-                  markers: [
-                    Marker(
-                      // rotateOrigin: Offset(1220, 1220),
-                      rotateAlignment: const Alignment(90, 150), //anchorPos: AnchorPos<LatLng>(),
-                      point: LatLng(lat, lng),
-                      builder: (ctx) {
-                        return Transform.scale(
-                          scale: 1.2,
-                          child: SvgPicture.string(
-                            """
+                layers: [
+                  TileLayerOptions(
+                    urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    subdomains: ['a', 'b', 'c'],
+                  ),
+                  MarkerLayerOptions(
+                    markers: [
+                      Marker(
+                        // rotateOrigin: Offset(1220, 1220),
+                        rotateAlignment: const Alignment(90, 150), //anchorPos: AnchorPos<LatLng>(),
+                        point: LatLng(lat, lng),
+                        builder: (ctx) {
+                          return Transform.scale(
+                            scale: 1.2,
+                            child: SvgPicture.string(
+                              """
 <svg viewBox="-197.855 0 791.42 791.42">
             <g>
                 <path d="M197.849,0C122.131,0,60.531,61.609,60.531,137.329c0,72.887,124.591,243.177,129.896,250.388l4.951,6.738
@@ -125,15 +128,15 @@ class _MapsFlutterState extends State<MapsFlutter> {
             </g>
         </svg>
 """,
-                            width: 100,
-                            color: Colors.red,
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                PolylineLayerOptions(
+                              width: 100,
+                              color: Colors.red,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  /* PolylineLayerOptions(
                   polylines: [
                     Polyline(
                       points: Provider.of<LocationProvider>(
@@ -155,23 +158,24 @@ class _MapsFlutterState extends State<MapsFlutter> {
                 ),
                 PolygonLayerOptions(
                   polygons: polygons,
-                ),
-                /* PolylineLayerOptions(
+                ), */
+                  /* PolylineLayerOptions(
                   polylines: polyLines,
                 ),
                 PolylineLayerOptions(
                   polylines: polyLines,
                   //polylineCulling: true,
                 ), */
-              ],
-            ),
-          );
-        } else {
-          return const CupertinoActivityIndicator(
-            radius: 100,
-          );
-        }
-      },
+                ],
+              ),
+            );
+          } else {
+            return const CupertinoActivityIndicator(
+              radius: 100,
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -218,7 +222,7 @@ class PolylinePage extends StatefulWidget {
 }
 
 class _PolylinePageState extends State<PolylinePage> {
-  late List<Polyline> polylines;
+  late List<Polyline> trackPolylines;
 
   late Timer timer;
   double get random => (Random().nextDouble() * 2.0 - 1) * 0.05;
@@ -236,7 +240,7 @@ class _PolylinePageState extends State<PolylinePage> {
         );
       });
     });
-    polylines = [
+    trackPolylines = [
       Polyline(
         points: points,
         strokeWidth: 4.0,
@@ -273,11 +277,11 @@ class _PolylinePageState extends State<PolylinePage> {
             urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             subdomains: ['a', 'b', 'c'],
           ),
-          PolylineLayerOptions(
-            polylines: polylines,
+          /* PolylineLayerOptions(
+            polylines: trackPolylines,
             polylineCulling: true,
           ),
-          /* PolylineLayerOptions(
+          PolylineLayerOptions(
             polylines: [
               Polyline(
                 points: points,
